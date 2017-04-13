@@ -1,0 +1,32 @@
+{
+  "name": "rfid-reader",
+  "version": "1.0.0",
+  "description": "RC522 reader server",
+  "main": "reader.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/masu1402/rfid-reader.git"
+  },
+  "keywords": [
+    "rc522",
+    "rfid",
+    "reader",
+    "wiring-pi"
+  ],
+  "author": "Mattias Sundling <masu1402@student.miun.se>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/masu1402/rfid-reader/issues"
+  },
+  "homepage": "https://github.com/masu1402/rfid-reader#readme",
+  "dependencies": {
+    "express": "^4.15.2",
+    "localtunnel": "^1.8.2",
+    "mfrc522-rpi": "^1.0.5",
+    "node-cache": "^4.1.1",
+    "request": "^2.81.0"
+  }
+}
