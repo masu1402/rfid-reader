@@ -10,9 +10,9 @@ app.listen(3000, function() {
 
 	setInterval(function(){
 	
-		console.log(cache.get("timing"));
+		//console.log(cache.get("timing"));
 
-		//skips loop if there is no card to be read
+		// skips loop if there is no card to be read
 	        if(!mfrc522.findCard().status){
 			return;
 		}
@@ -29,11 +29,14 @@ app.listen(3000, function() {
 	
 	        // store unique identifier in cache	
 		cache.set("timing", { uid : mfrc522.getUid().data.join(""), time : new Date() }, 2);
+		options.url = "https://bor-rest-masu1402.c9users.io/api/competitors/?uid=" + cache.get("timing").uid,
 		options.body = cache.get("timing");
-		
-		// send POST-request to REST API
-		request(options, function(error, response){
+
+
+		// send POST-request to REST API with Digest authentication
+		request(options, function(error, response, body){
 			if (error) console.error(error);
+			console.log(body);
 		});
 		
 	}, 50);
@@ -41,9 +44,14 @@ app.listen(3000, function() {
 });
 
 var options = {
-	url: "https://bor-rest-masu1402.c9users.io/",
-	method: "post",
-	port: 8080,
+	"url": "https://bor-rest-masu1402.c9users.io/api/competitor",
+	"method": "POST",
+	"port": 8080,
+	"auth": {
+		"username": "masu1402",
+		"password": "test",
+		"sendImmediately": false
+	},
 	body: {},
 	json: true
 }
