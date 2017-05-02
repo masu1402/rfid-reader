@@ -23,17 +23,18 @@ app.listen(3000, function() {
 		}
 
 		// skips loop if unique identification is cached and the same as read card data
-		if(! (cache.get("timing") == null || cache.get("timing").uid != mfrc522.getUid().data.join(""))){
+		if(! (cache.get("reading") == null || cache.get("reading").uid != mfrc522.getUid().data.join(""))){
 			return;
 		}
 	
 	        // store unique identifier in cache	
-		cache.set("timing", { uid : mfrc522.getUid().data.join(""), time : new Date() }, 2);
-		options.url = "https://bor-rest-masu1402.c9users.io/api/competitors/?uid=" + cache.get("timing").uid,
-		options.body = cache.get("timing");
+		cache.set("reading", { uid : mfrc522.getUid().data.join(""), time : new Date() }, 2);
+		options.url = "https://bor-rest-masu1402.c9users.io/api/competitor/" + cache.get("reading").uid 
+				+ "/node/" + process.argv[2],
+		options.body = cache.get("reading");
 
 
-		// send POST-request to REST API with Digest authentication
+		// send PATCH-request to REST API with Digest authentication
 		request(options, function(error, response, body){
 			if (error) console.error(error);
 			console.log(body);
@@ -45,12 +46,12 @@ app.listen(3000, function() {
 
 var options = {
 	"url": "https://bor-rest-masu1402.c9users.io/api/competitor",
-	"method": "POST",
+	"method": "PATCH",
 	"port": 8080,
 	"auth": {
 		"username": "masu1402",
 		"password": "test",
-		"sendImmediately": false
+		"sendImmediately": true
 	},
 	body: {},
 	json: true
