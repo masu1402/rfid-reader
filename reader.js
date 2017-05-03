@@ -1,16 +1,17 @@
 // set up =============================================== set up 
 var express = require("express");
 var app = express();
+var read = require("read");
 var request = require("request");
 var mfrc522 = new (require("mfrc522-rpi"));
 const cache = new(require("node-cache"));
+var readline = require('readline');
 
 // listen (start app with node reader.js) =============== listener 
 app.listen(3000, function() {
-
+	prompt();
+		
 	setInterval(function(){
-	
-		//console.log(cache.get("timing"));
 
 		// skips loop if there is no card to be read
 	        if(!mfrc522.findCard().status){
@@ -30,29 +31,48 @@ app.listen(3000, function() {
 	        // store unique identifier in cache	
 		cache.set("reading", { uid : mfrc522.getUid().data.join(""), time : new Date() }, 2);
 		options.url = "https://bor-rest-masu1402.c9users.io/api/competitor/" + cache.get("reading").uid 
-				+ "/node/" + process.argv[2],
+				+ "/node/" + nid,
 		options.body = cache.get("reading");
 
 
 		// send PATCH-request to REST API with Digest authentication
 		request(options, function(error, response, body){
 			if (error) console.error(error);
-			console.log(body);
+			console.log(options);
 		});
-		
-	}, 50);
 
+	}, 50);
 });
 
+var nid = "";
 var options = {
-	"url": "https://bor-rest-masu1402.c9users.io/api/competitor",
+	"url": "https://bor-rest-masu1402.c9users.io/api",
 	"method": "PATCH",
 	"port": 8080,
 	"auth": {
-		"username": "masu1402",
-		"password": "test",
-		"sendImmediately": true
+		"user": "",
+		"pass": "",
+		"sendImmediately": false
 	},
 	body: {},
 	json: true
 }
+
+
+function prompt(){
+	
+	try {
+		read( { prompt: "Node #: " }, function (err, node) {
+			read( { prompt: "Username: " }, function (err, username) {
+				read( { prompt: "Password: ", silent: true }, function (err, password) {
+					nid = node;
+					options.auth.user = username;
+					options.auth.pass = password;
+				})
+			})
+		})
+	} catch (err) {
+		console.error(err);
+	}
+}
+		

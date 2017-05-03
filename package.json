@@ -27,6 +27,7 @@
     "localtunnel": "^1.8.2",
     "mfrc522-rpi": "^1.0.5",
     "node-cache": "^4.1.1",
+    "read": "^1.0.7",
     "request": "^2.81.0"
   }
 }
