@@ -9,6 +9,8 @@ var readline = require('readline');
 
 // listen (start app with node reader.js) =============== listener 
 app.listen(3000, function() {
+	
+	// ask for  user input to setup node with race, node and authentication identifiers
 	prompt();
 		
 	setInterval(function(){
@@ -24,16 +26,22 @@ app.listen(3000, function() {
 		}
 
 		// skips loop if unique identification is cached and the same as read card data
-		if(! (cache.get("reading") == null || cache.get("reading").uid != mfrc522.getUid().data.join(""))){
+		if(! (cache.get("reading") == null || cache.get("reading").uid != uidToHex(mfrc522.getUid().data))){
 			return;
 		}
-	
-	        // store unique identifier in cache	
-		cache.set("reading", { uid : mfrc522.getUid().data.join(""), time : new Date() }, 2);
-		options.url = "https://bor-rest-masu1402.c9users.io/api/competitor/" + cache.get("reading").uid 
-				+ "/node/" + nid,
+		
+		// converts UID to hexadecimal and stores it in cache for 2 seconds
+		cache.set("reading", { uid : uidToHex(mfrc522.getUid().data), time : new Date() }, 2);
+		
+		// builds PATCH-url by using cached variables set at start
+		try {
+		options.url = "https://bor-rest-masu1402.c9users.io/api/race/" + cache.get("prompt").rid;
+		options.url += "/competitors/" + cache.get("reading").uid;
+		options.url += "/readings/" + cache.get("prompt").nid; 
 		options.body = cache.get("reading");
-
+		} catch (error){
+			console.error(error)
+		}
 
 		// send PATCH-request to REST API with Digest authentication
 		request(options, function(error, response, body){
@@ -44,9 +52,8 @@ app.listen(3000, function() {
 	}, 50);
 });
 
-var nid = "";
 var options = {
-	"url": "https://bor-rest-masu1402.c9users.io/api",
+	"url": "https://bor-rest-masu1402.c9users.io/api/",
 	"method": "PATCH",
 	"port": 8080,
 	"auth": {
@@ -58,16 +65,24 @@ var options = {
 	json: true
 }
 
-
+/**
+ * asks for user input which is used in HTTP-request
+ */
 function prompt(){
 	
 	try {
-		read( { prompt: "Node #: " }, function (err, node) {
-			read( { prompt: "Username: " }, function (err, username) {
-				read( { prompt: "Password: ", silent: true }, function (err, password) {
-					nid = node;
-					options.auth.user = username;
-					options.auth.pass = password;
+		read( { prompt: "Race identifier: " }, function (err, race) {
+			read( { prompt: "Node #: " }, function (err, node) {
+				read( { prompt: "Username: " }, function (err, username) {
+					read( { prompt: "Password: ", silent: true }, function (err, password) {
+						cache.set("prompt",
+						{
+							rid: race,
+							nid: node
+						})
+						options.auth.user = username;
+						options.auth.pass = password;
+					})
 				})
 			})
 		})
@@ -75,4 +90,17 @@ function prompt(){
 		console.error(err);
 	}
 }
+
+/**
+ * converts first 4 bytes (uid) from read MIFARE tag and returns as hex-string
+ */
+function uidToHex(data){
+	var hex = [];
+
+	for(var i = 0; i < data.length - 1; i++){
 		
+		hex.push(data[i].toString(16));
+	}
+	
+	return hex.join(":");
+}
