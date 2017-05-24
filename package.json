@@ -24,7 +24,6 @@
   "homepage": "https://github.com/masu1402/rfid-reader#readme",
   "dependencies": {
     "express": "^4.15.2",
-    "localtunnel": "^1.8.2",
     "mfrc522-rpi": "^1.0.5",
     "node-cache": "^4.1.1",
     "read": "^1.0.7",
